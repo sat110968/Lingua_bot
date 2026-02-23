@@ -1,0 +1,48 @@
+name: linguabot
+description: "A LinguaBot Language Learning App"
+publish_to: 'none'
+version: 1.0.0
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Core & State Management
+  provider: ^6.1.2
+  shared_preferences: ^2.2.3
+
+  # AI & Voice
+  http: ^1.2.1  # Used for direct Gemini API calls
+  flutter_tts: ^4.0.2
+  speech_to_text: ^7.3.0
+  record: ^5.0.5
+  permission_handler: ^11.3.1
+  audioplayers: ^6.0.0
+  path_provider: ^2.1.3
+  
+  # UI & Utilities
+  cupertino_icons: ^1.0.8
+  google_fonts: ^6.2.1
+  fl_chart: ^0.68.0
+  uuid: ^4.4.0
+  flutter_dotenv: ^6.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+# Add this section to resolve the build error
+dependency_overrides:
+  record_linux: ^1.2.1
+
+flutter:
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - .env # Add this line to include your .env file
+    # - images/a_dot_ham.jpeg

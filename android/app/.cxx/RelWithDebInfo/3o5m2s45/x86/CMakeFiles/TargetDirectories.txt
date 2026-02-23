@@ -1,0 +1,2 @@
+D:/Linguabot/lingua_bot/android/app/.cxx/RelWithDebInfo/3o5m2s45/x86/CMakeFiles/edit_cache.dir
+D:/Linguabot/lingua_bot/android/app/.cxx/RelWithDebInfo/3o5m2s45/x86/CMakeFiles/rebuild_cache.dir
