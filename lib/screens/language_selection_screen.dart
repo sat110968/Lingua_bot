@@ -7,6 +7,7 @@ import '../theme.dart';
 import '../widgets/language_selector.dart';
 import '../models/practice_mode.dart';
 import 'chat_screen.dart';
+import 'grammar_screen.dart';
 
 class LanguageSelectionScreen extends StatefulWidget {
   const LanguageSelectionScreen({super.key});
@@ -145,43 +146,42 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
                       ),
                     ),
                     
-                    const SizedBox(height: 64),
+                    const SizedBox(height: 48),
                     
-                    // Continue button
-                    SizedBox(
-                      width: double.infinity,
-                      child: Consumer<SettingsProvider>(
-                        builder: (context, settings, _) => ElevatedButton(
-                          // Only allow continue when both languages are selected
-                          onPressed: settings.learningLanguage != null && settings.nativeLanguage != null
-                              ? () {
-                                  _showPracticeModeSelection(context);
-                                }
-                              : null,
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                    // Dashboard Actions
+                    Text(
+                      'What would you like to do?',
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 16),
+                    Consumer<SettingsProvider>(
+                      builder: (context, settings, _) => Row(
+                        children: [
+                          Expanded(
+                            child: _buildDashboardCard(
+                              context: context,
+                              title: 'Practice',
+                              icon: Icons.chat_bubble_outline,
+                              isEnabled: settings.learningLanguage != null && settings.nativeLanguage != null,
+                              onTap: () => _showPracticeModeSelection(context),
                             ),
-                            backgroundColor: AppTheme.primaryColor,
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Continue',
-                                style: theme.textTheme.labelLarge?.copyWith(
-                                  color: const Color.fromARGB(255, 235, 209, 209),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              const Icon(
-                                Icons.arrow_forward_rounded,
-                                color: Color.fromARGB(255, 251, 228, 228),
-                              ),
-                            ],
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: _buildDashboardCard(
+                              context: context,
+                              title: 'Grammar',
+                              icon: Icons.rule,
+                              isEnabled: settings.learningLanguage != null && settings.nativeLanguage != null,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const GrammarScreen()),
+                                );
+                              },
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
                     
@@ -366,5 +366,49 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
         ),
       );
     }).toList();
+  }
+
+  Widget _buildDashboardCard({
+    required BuildContext context,
+    required String title,
+    required IconData icon,
+    required bool isEnabled,
+    required VoidCallback onTap,
+  }) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: isEnabled ? onTap : null,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
+        decoration: BoxDecoration(
+          color: isEnabled ? AppTheme.primaryColor.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isEnabled ? AppTheme.primaryColor : Colors.grey.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 40,
+              color: isEnabled ? AppTheme.primaryColor : Colors.grey,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: isEnabled ? AppTheme.primaryColor : Colors.grey,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

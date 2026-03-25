@@ -6,9 +6,6 @@ import 'providers/chat_provider.dart';
 import 'services/gemini_service.dart';
 import 'services/speech_to_text_service.dart';
 import 'services/text_to_speech_service.dart';
-import 'screens/language_selection_screen.dart';
-import 'screens/chat_screen.dart';
-import 'theme.dart';
 import 'app.dart';
 
 Future<void> main() async {

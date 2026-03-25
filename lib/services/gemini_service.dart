@@ -11,7 +11,7 @@ class GeminiService {
   
   // Corrected: Use the stable v1 endpoint with a supported free model
   final String _baseUrl =
-      'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent';
+      'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent';
 
  String _getSystemPrompt(String learningLanguage, String nativeLanguage, String mode) {
   // We can add a topic variable later, for now, we'll focus on the mode.
@@ -91,7 +91,7 @@ CORRECTION_END
     }
     
     try {
-      debugPrint('🔵 Attempting Gemini call with model: gemini-1.5-flash-latest');
+      debugPrint('🔵 Attempting Gemini call with model: gemini-1.5-flash');
       debugPrint('🔵 Message: $message');
 
       // Corrected: Build a structured history for the v1 API
@@ -131,7 +131,7 @@ CORRECTION_END
           'contents': contents,
           'generationConfig': {
             'temperature': 0.7,
-            'maxOutputTokens': 300,
+            'maxOutputTokens': 1000,
             'topP': 0.8,
             'topK': 40,
           },
@@ -256,7 +256,7 @@ CORRECTION_END
       'contents': contents,
       'generationConfig': {
         'temperature': 0.7,
-        'maxOutputTokens': 300,
+        'maxOutputTokens': 1000,
         'topP': 0.8,
         'topK': 40,
       },

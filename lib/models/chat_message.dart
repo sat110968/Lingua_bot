@@ -1,5 +1,3 @@
-import 'package:uuid/uuid.dart';
-
 enum MessageRole { user, assistant }
 
 class ChatMessage {
