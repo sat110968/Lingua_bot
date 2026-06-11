@@ -6,6 +6,7 @@ import 'providers/chat_provider.dart';
 import 'services/gemini_service.dart';
 import 'services/speech_to_text_service.dart';
 import 'services/text_to_speech_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app.dart';
 
 Future<void> main() async {
@@ -14,6 +15,12 @@ Future<void> main() async {
 
   // Load the .env file
   await dotenv.load(fileName: ".env");
+
+  // Initialize Supabase
+  await Supabase.initialize(
+    url: dotenv.env['SUPABASE_URL'] ?? '',
+    anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
+  );
 
   // Initialize services
   final geminiService = GeminiService();
@@ -32,7 +39,7 @@ Future<void> main() async {
         ChangeNotifierProvider(
           create: (_) => ChatProvider(geminiService),
         ),
-        Provider<SpeechToTextService>.value(value: speechToTextService),
+        ChangeNotifierProvider<SpeechToTextService>.value(value: speechToTextService),
         ChangeNotifierProvider.value(value: textToSpeechService),
       ],
       // Use the imported app class which handles themes and routing

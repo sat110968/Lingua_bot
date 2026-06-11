@@ -7,7 +7,7 @@ import '../models/practice_mode.dart';
 class SettingsProvider extends ChangeNotifier {
   Language? _learningLanguage;
   Language? _nativeLanguage;
-  PracticeMode _practiceMode = PracticeMode.conversation;
+  PracticeMode _practiceMode = PracticeMode.basicConversation;
 
   Language? get learningLanguage => _learningLanguage;
   Language? get nativeLanguage => _nativeLanguage;
@@ -32,7 +32,7 @@ class SettingsProvider extends ChangeNotifier {
       if (practiceModeString != null) {
         _practiceMode = PracticeMode.values.firstWhere(
           (e) => e.name == practiceModeString,
-          orElse: () => PracticeMode.conversation,
+          orElse: () => PracticeMode.basicConversation,
         );
       }
       notifyListeners();

@@ -9,6 +9,7 @@ import '../services/speech_to_text_service.dart';
 import '../services/text_to_speech_service.dart';
 import '../widgets/chat_message_widget.dart';
 import '../widgets/recording_button.dart';
+import '../widgets/robo_avatar.dart';
 import 'language_selection_screen.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -24,6 +25,7 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
   late AnimationController _animationController;
   bool _isVoiceInputMode = true;
   bool _showSettings = false;
+  String _speechLanguage = 'Native';
 
   @override
   void initState() {
@@ -37,6 +39,7 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
     
     // Use WidgetsBinding to safely interact with context after the build phase.
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       final chatProvider = Provider.of<ChatProvider>(context, listen: false);
       if (chatProvider.messages.isEmpty) {
         _sendWelcomeMessage();
@@ -50,6 +53,7 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
   void dispose() {
     // Clean up listeners and controllers to prevent memory leaks.
     Provider.of<ChatProvider>(context, listen: false).removeListener(_onNewMessage);
+    Provider.of<TextToSpeechService>(context, listen: false).stop();
     _textController.dispose();
     _scrollController.dispose();
     _animationController.dispose();
@@ -60,6 +64,11 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
     _scrollToBottom();
     
+    String cleanText(String text) {
+      // Remove explicit Markdown symbols naturally spoken by TTS
+      return text.replaceAll(RegExp(r'[*_`#]'), '').replaceAll(RegExp(r'\n-'), '\n').trim();
+    }
+
     // Automatically play TTS for new AI messages.
     if (chatProvider.messages.isNotEmpty) {
       final lastMessage = chatProvider.messages.last;
@@ -67,33 +76,20 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
       final settings = Provider.of<SettingsProvider>(context, listen: false);
 
       if (lastMessage.role == MessageRole.assistant && (lastMessage.isError == false)) {
-        // Check if the message content contains the separator.
         if (lastMessage.content.contains('|||')) {
           final parts = lastMessage.content.split('|||');
-          final learningText = parts[0].trim();
-          final nativeText = parts[1].trim();
+          final learningText = cleanText(parts[0]);
+          final nativeText = cleanText(parts[1]);
 
-          // Play the first part in the learning language.
-          ttsService.speak(
-            learningText,
-            languageCode: settings.learningLanguage?.code,
-          );
-
-          // You might add a slight delay here before playing the explanation.
-          Future.delayed(const Duration(seconds: 1), () {
-            // Play the second part in the native language.
-            ttsService.speak(
-              nativeText,
-              languageCode: settings.nativeLanguage?.code,
-            );
-          });
-
+          // Play the selected language track purely
+          if (_speechLanguage == 'Native') {
+             ttsService.speak(nativeText, languageCode: settings.nativeLanguage?.code);
+          } else {
+             ttsService.speak(learningText, languageCode: settings.learningLanguage?.code);
+          }
         } else {
-          // If there's no separator, play the whole message in the learning language.
-          ttsService.speak(
-            lastMessage.content,
-            languageCode: settings.learningLanguage?.code,
-          );
+          // Fallback if no ||| split: User requested robot defaults to Native Language!
+          ttsService.speak(cleanText(lastMessage.content), languageCode: settings.nativeLanguage?.code);
         }
       } else if (lastMessage.isError == true) {
         // Play an audible error message so user notices the problem.
@@ -143,12 +139,12 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
     final settings = Provider.of<SettingsProvider>(context, listen: false);
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
     
-    // This is the core logic 
     chatProvider.sendMessage(
       userMessage: text,
       learningLanguage: settings.learningLanguage?.name ?? 'English',
       nativeLanguage: settings.nativeLanguage?.name ?? 'English',
       mode: settings.practiceMode.name,
+      speechLanguage: _speechLanguage,
     );
     
     if (!_isVoiceInputMode) {
@@ -166,6 +162,7 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
 
     return WillPopScope(
       onWillPop: () async {
+        Provider.of<TextToSpeechService>(context, listen: false).stop();
         // Allow pop by default; you can show confirm dialog here if needed
         return true;
       },
@@ -174,6 +171,7 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
+              Provider.of<TextToSpeechService>(context, listen: false).stop();
               // Navigate back to language selection and replace current screen.
               Navigator.pushReplacement(
                 context,
@@ -183,20 +181,47 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
           ),
           title: Text(settingsProvider.learningLanguage?.name ?? 'LinguaBot'),
           centerTitle: true,
-          // 1. ADD THE BACK ARROW BUTTON HERE (The 'leading' widget)
-        actions: [
-          // NEW: Reset Conversation Button
+          actions: [
+            // NEW: Speech Language Toggle
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: Row(
+              children: [
+                const Icon(Icons.volume_up, size: 20, color: Colors.white),
+                const SizedBox(width: 4),
+                DropdownButton<String>(
+                  value: _speechLanguage,
+                  underline: const SizedBox(),
+                  icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+                  dropdownColor: Theme.of(context).colorScheme.primary,
+                  selectedItemBuilder: (BuildContext context) {
+                    return ['Native', 'Learning'].map((String value) {
+                      return Center(
+                        child: Text(value, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+                      );
+                    }).toList();
+                  },
+                  items: const [
+                     DropdownMenuItem(value: 'Native', child: Text('Native Audio', style: TextStyle(color: Colors.white))),
+                     DropdownMenuItem(value: 'Learning', child: Text('Learning Audio', style: TextStyle(color: Colors.white))),
+                  ],
+                  onChanged: (String? val) {
+                    if (val != null) setState(() => _speechLanguage = val);
+                  },
+                ),
+              ],
+            ),
+          ),
+          // RESTORED: Reset Conversation Button
           IconButton(
             icon: const Icon(Icons.delete_sweep_outlined),
             tooltip: 'Reset Conversation',
             onPressed: () {
-              // You should show a confirmation dialog here (recommended)
-              // For a quick fix, call the provider method directly:
+              Provider.of<TextToSpeechService>(context, listen: false).stop();
               Provider.of<ChatProvider>(context, listen: false).resetChat();
             },
           ),
-    
-          // EXISTING: Settings Button
+          // EXISTING: Setup/Settings Button
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
@@ -219,6 +244,23 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
             SizeTransition(
               sizeFactor: _animationController,
               child: _buildSettingsPanel(context, settingsProvider),
+            ),
+            // Avatar Section
+            Padding(
+               padding: const EdgeInsets.symmetric(vertical: 16),
+               child: Consumer3<ChatProvider, TextToSpeechService, SpeechToTextService>(
+                  builder: (context, chat, tts, stt, child) {
+                     RoboState state = RoboState.idle;
+                     if (chat.isLoading) {
+                        state = RoboState.thinking;
+                     } else if (tts.isPlaying) {
+                        state = RoboState.speaking;
+                     } else if (stt.isListening) {
+                        state = RoboState.listening;
+                     }
+                     return RoboAvatar(state: state);
+                  },
+               ),
             ),
             // Chat messages list
             Expanded(

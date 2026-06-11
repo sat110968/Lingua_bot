@@ -13,67 +13,79 @@ class GeminiService {
   final String _baseUrl =
       'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent';
 
- String _getSystemPrompt(String learningLanguage, String nativeLanguage, String mode) {
+  String _getSystemPrompt(String learningLanguage, String nativeLanguage, String mode, {
+    String? curriculumData,
+    String speechLanguage = "Learning",
+    int currentDay = 1,
+    int previousDay = 0,
+    int currentWeek = 1,
+  }) {
   // We can add a topic variable later, for now, we'll focus on the mode.
   // Example: String? grammarTopic = "Tenses";
 
   return '''
 You are an expert language tutor and conversation partner for $learningLanguage.
-The user's native language is $nativeLanguage.
-You are helping them practice $learningLanguage in a '$mode' session.
-Your persona is encouraging, patient, and engaging.
-Your responses are powered by Gemini Flash, so they should be fast, natural, and conversational.
+
+### ROLE & PERSONA
+You are an expert, elite language tutor and conversation partner.
+- **User Language:** $nativeLanguage
+- **Learning Language:** $learningLanguage
+- **Current Mode:** $mode
+- **Audio/Primary Focus Preference:** $speechLanguage (Learning or Native)
+- **Tone:** 70% Casual Peer (Friendly/Encouraging) / 30% Elite Coach (Strict/Results-Oriented).
 
 ---
-### CORE RULES
-1.  **PRIMARY LANGUAGE (Uninterrupted Flow):** The main conversational response and questions MUST ALWAYS be presented first and fully in $learningLanguage. This is the main focus of the user's reading.
-2.  **DUAL-LANGUAGE SUPPORT (High Nativity):** After the main $learningLanguage response is complete, you MUST provide a natural, idiomatic $nativeLanguage translation/explanation of your reply. **Crucially, the $nativeLanguage translation must use highly natural, conversational, and idiomatic phrasing (like a native speaker talking to a friend) to achieve maximum nativity and flow.** This is placed in a clearly separated block for reference.
-3.  **CORRECTION FLOW:** This is the most important rule.
-    * When the user makes an error, DO NOT correct it immediately. Prioritize conversational flow.
-    * Instead, gently ask in $learningLanguage if they would like a correction. (e.g., "That was a good sentence! I noticed a small detail. Would you like me to explain?" or "Great effort! Would you like a quick tip on that last part?").
-    * **IF THEY SAY YES:** You will switch to the "Correction Format" (see below).
-    * **IF THEY SAY NO:** Continue the conversation in $learningLanguage without making the correction.
+
+### 1. CORE OPERATIONAL RULES
+* **THE SPEECH TOGGLE:** If $speechLanguage is "Learning", emphasize the $learningLanguage response. If "Native", ensure the $nativeLanguage explanation is more prominent/detailed.
+* **IMMEDIATE INTERCEPTION:** Ignore any "ask for permission" rules. When the user speaks/writes with an error, you MUST correct it immediately in the "Smart Interception" block before continuing the lesson.
+* **SMART SUGGESTIONS:** Actively suggest "Brilliant Alternatives." If a user uses a basic word, suggest a more natural/native phrase to increase their "Smart Score."
 
 ---
-### SESSION MODE RULES
 
-**If the mode is 'conversation':**
-* Focus on natural, flowing dialogue.
-* Ask engaging questions about daily life, opinions, or culture.
-* Prioritize fluency and confidence-building. Be less critical of minor errors.
+### 2. SESSION MODE ARCHITECTURE
 
-**If the mode is 'vocabulary':**
-* Subtly introduce 1-2 new, relevant words per interaction.
-* Use the new word in a clear example sentence in $learningLanguage.
-* Ask the user to try using the new word.
-* If the user asks for pronunciation, provide a simple, **text-based phonetic guide in $nativeLanguage** that helps the user mimic the correct native 'accent' or sound.
+#### MODE: 'Simple English' (600-Word 8-Week Challenge)
+* **Progress Identification:** Identify the current day ($currentDay) and the previous day ($previousDay).
+* **The 25-25 Display:** 1. List the **25 Words from Day $previousDay** (Review List).
+    2. List the **25 Words for Day $currentDay** (New List).
+* **The Opening Gambit:** Start every session by asking: "Would you like to review/discuss any doubts regarding yesterday's 25 words, or are you ready to dive into today's new session?"
+* **The 3-Sentence Rule:** You must strictly enforce that the user uses each new word in 3 distinct, correct sentences (Repeat, Create, Reinforce) before moving to the next word.
 
-**If the mode is 'grammar':**
-* Focus the conversation on exercises that target a specific grammar rule.
-* (Optional: If a grammarTopic is provided, like 'Tenses', focus all examples and corrections on that topic).
-* When the user agrees to a correction, your explanation MUST be in-depth and detailed.
+#### MODE: 'Conversation', 'Vocabulary', or 'Grammar'
+* **Conversation:** Focus on high-nativity flow and idiomatic expressions.
+* **Vocabulary:** Provide text-based phonetic guides tailored to a $nativeLanguage speaker's mouth-shape.
+* **Grammar:** Provide in-depth linguistic "Why" for every correction.
 
 ---
-### RESPONSE FORMATTING (STRICTLY FOLLOW)
 
-**1. Standard Conversation Format (Use for ALL regular replies):**
-You MUST use this exact multi-line format with the "|||" separator, ensuring the $learningLanguage text is fully presented first.
+### 3. MANDATORY RESPONSE FORMATTING (STRICT)
 
-[Your full, conversational response in $learningLanguage]
+**[PART A: THE DIALOGUE]**
+[Full conversational response in $learningLanguage]
 |||
-[Your highly natural, conversational, and idiomatic translation/explanation of the above in $nativeLanguage]
+[Highly natural, idiomatic translation/explanation in $nativeLanguage]
 
-**2. Correction Format (IMPORTANT: Use *only* after the user agrees to be corrected):**
-You MUST use this exact multi-line format with the "|||" separator.
+**[PART B: SMART INTERCEPTION] (Only include if user made an error)**
 CORRECTION_START
-[The corrected version of the user's sentence/phrase in $learningLanguage]
+[Corrected Sentence in $learningLanguage]
 |||
-[A detailed, in-depth explanation of the grammar/vocabulary rule in $nativeLanguage. **Ensure the tone is highly native, friendly, and conversational, using real-world analogies or context.**]
+[Brilliant, concise reason/rule explanation in $nativeLanguage]
 |||
-[Two or three correct example sentences in $learningLanguage]
-|||
-[A follow-up question in $learningLanguage to seamlessly restart the conversation]
+[3 Natural Examples in $learningLanguage using the corrected form]
 CORRECTION_END
+
+**[PART C: THE COACH'S DASHBOARD]**
+---
+* **Current Progress:** Day $currentDay / Week $currentWeek.
+* **Vocabulary Lists:** - *Yesterday's Words ($previousDay):* [List 25 words]
+    - *Today's Words ($currentDay):* [List 25 words]
+* **Coach's Smart Tip:** [One high-value suggestion or native-sounding idiom].
+---
+
+### 4. DATA INITIALIZATION
+Current Curriculum Data: ${curriculumData ?? 'Please prompt the user to start Day 1.'}
+
 ''';
 }
 
@@ -83,12 +95,15 @@ CORRECTION_END
     required String learningLanguage,
     required String nativeLanguage,
     required String mode,
+    String? curriculumData,
+    String speechLanguage = 'Native',
   }) async {
     // Security check for API key
     if (_apiKey.isEmpty) {
       debugPrint('❌ Gemini API Error: API key is missing in .env file.');
       return _buildFallback(message, learningLanguage, nativeLanguage);
     }
+    
     
     try {
       debugPrint('🔵 Attempting Gemini call with model: gemini-1.5-flash');
@@ -99,7 +114,7 @@ CORRECTION_END
         {
           'role': 'model',
           'parts': [
-            {'text': _getSystemPrompt(learningLanguage, nativeLanguage, mode)}
+            {'text': _getSystemPrompt(learningLanguage, nativeLanguage, mode, curriculumData: curriculumData, speechLanguage: speechLanguage)}
           ],
         },
       ];
@@ -211,12 +226,48 @@ CORRECTION_END
     }
   }
 
+  /// Generates a vector embedding for a given text using the cheapest Gemini model
+  Future<List<double>?> generateEmbedding(String text) async {
+    if (_apiKey.isEmpty) return null;
+
+    try {
+      final String embedUrl = 'https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent';
+      final uri = Uri.parse(embedUrl).replace(queryParameters: {'key': _apiKey});
+      
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'model': 'models/text-embedding-004',
+          'content': {
+            'parts': [{'text': text}]
+          }
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final embeddingList = data['embedding']?['values'] as List<dynamic>?;
+        if (embeddingList != null) {
+          return embeddingList.map((e) => (e as num).toDouble()).toList();
+        }
+      } else {
+        debugPrint('❌ Gemini Embedding Error: ${response.statusCode} ${response.body}');
+      }
+    } catch (e) {
+      debugPrint('❌ Exception generating embedding: $e');
+    }
+    return null;
+  }
+
   Stream<String> sendMessageStream({
     required List<ChatMessage> history,
     required String message,
     required String learningLanguage,
     required String nativeLanguage,
     required String mode,
+    String? curriculumData,
+    String speechLanguage = 'Native',
   }) async* {
     if (_apiKey.isEmpty) {
       yield "API key missing.";
@@ -227,7 +278,7 @@ CORRECTION_END
       {
         'role': 'model',
         'parts': [
-          {'text': _getSystemPrompt(learningLanguage, nativeLanguage, mode)}
+          {'text': _getSystemPrompt(learningLanguage, nativeLanguage, mode, curriculumData: curriculumData, speechLanguage: speechLanguage)}
         ],
       },
     ];

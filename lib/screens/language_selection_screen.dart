@@ -6,8 +6,7 @@ import '../providers/settings_provider.dart';
 import '../theme.dart';
 import '../widgets/language_selector.dart';
 import '../models/practice_mode.dart';
-import 'chat_screen.dart';
-import 'grammar_screen.dart';
+import 'mode_selection_screen.dart';
 
 class LanguageSelectionScreen extends StatefulWidget {
   const LanguageSelectionScreen({super.key});
@@ -166,21 +165,6 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
                               onTap: () => _showPracticeModeSelection(context),
                             ),
                           ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: _buildDashboardCard(
-                              context: context,
-                              title: 'Grammar',
-                              icon: Icons.rule,
-                              isEnabled: settings.learningLanguage != null && settings.nativeLanguage != null,
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => const GrammarScreen()),
-                                );
-                              },
-                            ),
-                          ),
                         ],
                       ),
                     ),
@@ -292,10 +276,10 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
           // Save the chosen practice mode
           settings.setPracticeMode(mode);
           Navigator.pop(context); // Close bottom sheet
-          // Use direct pushReplacement to the ChatScreen so it works even without named routes
+          // Navigate to Mode Selection Screen
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const ChatScreen()),
+            MaterialPageRoute(builder: (context) => const ModeSelectionScreen()),
           );
         },
         child: Container(
@@ -317,11 +301,12 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
                   width: 50,
                   height: 50,
                   decoration: BoxDecoration(
-                    color: isSelected ? AppTheme.primaryColor.withOpacity(0.2) : Colors.grey.withOpacity(0.1),
+                    color: isSelected ? AppTheme.primaryColor.withValues(alpha: 0.2) : Colors.grey.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
-                    mode == PracticeMode.conversation ? Icons.chat_bubble_outline :
+                    mode == PracticeMode.basicConversation ? Icons.child_care :
+                    mode == PracticeMode.practicalConversation ? Icons.chat_bubble_outline :
                     mode == PracticeMode.vocabulary ? Icons.menu_book :
                     Icons.rule,
                     color: isSelected ? AppTheme.primaryColor : Colors.grey,
@@ -382,10 +367,10 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
         decoration: BoxDecoration(
-          color: isEnabled ? AppTheme.primaryColor.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+          color: isEnabled ? AppTheme.primaryColor.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isEnabled ? AppTheme.primaryColor : Colors.grey.withOpacity(0.3),
+            color: isEnabled ? AppTheme.primaryColor : Colors.grey.withValues(alpha: 0.3),
             width: 1,
           ),
         ),

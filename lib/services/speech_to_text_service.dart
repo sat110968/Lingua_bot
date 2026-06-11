@@ -6,7 +6,7 @@ import 'package:speech_to_text/speech_recognition_result.dart';
 
 /// A service to handle speech-to-text functionality using the speech_to_text package.
 /// This service is simplified to be more robust and easier to manage.
-class SpeechToTextService {
+class SpeechToTextService with ChangeNotifier {
   final stt.SpeechToText _speechToText = stt.SpeechToText();
   
   bool _isInitialized = false;
@@ -85,6 +85,7 @@ class SpeechToTextService {
     if (!_isListening) return;
     _speechToText.stop();
     _isListening = false;
+    notifyListeners();
   }
 
   /// Cancels the current listening session immediately.
@@ -92,6 +93,7 @@ class SpeechToTextService {
     if (!_isListening) return;
     _speechToText.cancel();
     _isListening = false;
+    notifyListeners();
   }
 
   // --- Internal Callbacks for the speech_to_text package ---
@@ -104,6 +106,7 @@ class SpeechToTextService {
     // When the result is final, we can consider the listening session complete.
     if (result.finalResult) {
       _isListening = false;
+      notifyListeners();
     }
   }
 
@@ -111,6 +114,7 @@ class SpeechToTextService {
   void _onError(SpeechRecognitionError error) {
     _lastError = 'Error: ${error.errorMsg} - ${error.permanent ? "Permanent" : "Temporary"}';
     _isListening = false;
+    notifyListeners();
     if (_listeningCompleter != null && !_listeningCompleter!.isCompleted) {
       _listeningCompleter!.complete(false);
     }
@@ -124,11 +128,13 @@ class SpeechToTextService {
     }
     if (status == 'listening') {
       _isListening = true;
+      notifyListeners();
       if (_listeningCompleter != null && !_listeningCompleter!.isCompleted) {
         _listeningCompleter!.complete(true);
       }
     } else if (status == 'done' || status == 'notListening') {
       _isListening = false;
+      notifyListeners();
       if (_listeningCompleter != null && !_listeningCompleter!.isCompleted) {
         _listeningCompleter!.complete(false);
       }
