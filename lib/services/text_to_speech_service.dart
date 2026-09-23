@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'language_accent_mapper.dart';
 
 class TextToSpeechService extends ChangeNotifier {
   final FlutterTts _flutterTts = FlutterTts();
@@ -110,9 +111,11 @@ class TextToSpeechService extends ChangeNotifier {
     }
 
     try {
-      // 1. Force the language to Indian English if they are learning English
-      if (languageCode == 'en' || languageCode == 'en-US' || languageCode == 'en-GB' || languageCode == null) {
-          languageCode = 'en-IN';
+      // 1. Map to native accent/language code
+      if (languageCode == null || languageCode.isEmpty) {
+        languageCode = 'en-US';
+      } else {
+        languageCode = LanguageAccentMapper.getNativeTtsCode(languageCode);
       }
 
       // 2. Strictly hunt for a Female Voice, prioritizing Indian Female

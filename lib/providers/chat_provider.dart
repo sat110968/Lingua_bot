@@ -77,6 +77,7 @@ class ChatProvider extends ChangeNotifier {
     required String mode,
     required String speechLanguage,
     String? audioPath,
+    String? grammarTopic,
   }) async {
     // 1. Add the user's message ONCE.
     _messages.add(ChatMessage(
@@ -137,6 +138,7 @@ class ChatProvider extends ChangeNotifier {
           mode: mode,
           curriculumData: curriculumData,
           speechLanguage: speechLanguage,
+          grammarTopic: grammarTopic,
         );
 
         // 4. Save new response to Supabase cache asynchronously

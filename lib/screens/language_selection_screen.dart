@@ -6,7 +6,8 @@ import '../providers/settings_provider.dart';
 import '../theme.dart';
 import '../widgets/language_selector.dart';
 import '../models/practice_mode.dart';
-import 'mode_selection_screen.dart';
+import 'grammar_selection_screen.dart';
+import 'conversation_screen.dart';
 
 class LanguageSelectionScreen extends StatefulWidget {
   const LanguageSelectionScreen({super.key});
@@ -19,7 +20,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
   late final AnimationController _animationController;
   late final Animation<double> _fadeAnimation;
   late final Animation<Offset> _slideAnimation;
-  
+
   @override
   void initState() {
     super.initState();
@@ -27,7 +28,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
       vsync: this,
       duration: const Duration(milliseconds: 800),
     );
-    
+
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -35,7 +36,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
-    
+
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.1),
       end: Offset.zero,
@@ -43,10 +44,10 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
-    
+
     _animationController.forward();
   }
-  
+
   @override
   void dispose() {
     _animationController.dispose();
@@ -56,7 +57,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -78,7 +79,6 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
                           width: 60,
                           height: 60,
                           decoration: BoxDecoration(
-                            //gradient: AppTheme.of(context).primaryGradient,
                             color: Colors.blue,
                             borderRadius: BorderRadius.circular(16),
                           ),
@@ -99,7 +99,6 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
                             Text(
                               'AI-powered language practice',
                               style: theme.textTheme.bodyMedium?.copyWith(
-                                // FIX: Use AppColors for static color constants.
                                 color: AppColors.textMuted,
                               ),
                             ),
@@ -107,9 +106,9 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
                         ),
                       ],
                     ),
-                    
+
                     const SizedBox(height: 48),
-                    
+
                     // I want to learn section
                     Text(
                       'I want to learn',
@@ -118,17 +117,15 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
                     const SizedBox(height: 16),
                     Consumer<SettingsProvider>(
                       builder: (context, settings, _) => LearningLanguageSelector(
-                        // FIX: Pass the nullable value directly. The LanguageSelector
-                        // widget is designed to handle null and show a hint text.
                         selectedLanguage: settings.learningLanguage,
                         onLanguageSelected: (language) {
                           settings.setLearningLanguage(language);
                         },
                       ),
                     ),
-                    
+
                     const SizedBox(height: 32),
-                    
+
                     // My native language section
                     Text(
                       'My native language is',
@@ -137,47 +134,54 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
                     const SizedBox(height: 16),
                     Consumer<SettingsProvider>(
                       builder: (context, settings, _) => NativeLanguageSelector(
-                        // FIX: Pass the nullable value directly.
                         selectedLanguage: settings.nativeLanguage,
                         onLanguageSelected: (language) {
                           settings.setNativeLanguage(language);
                         },
                       ),
                     ),
-                    
+
                     const SizedBox(height: 48),
-                    
-                    // Dashboard Actions
+
+                    // Practice Type Selection
                     Text(
                       'What would you like to do?',
                       style: theme.textTheme.titleMedium,
                     ),
                     const SizedBox(height: 16),
                     Consumer<SettingsProvider>(
-                      builder: (context, settings, _) => Row(
+                      builder: (context, settings, _) => Column(
                         children: [
-                          Expanded(
-                            child: _buildDashboardCard(
-                              context: context,
-                              title: 'Practice',
-                              icon: Icons.chat_bubble_outline,
-                              isEnabled: settings.learningLanguage != null && settings.nativeLanguage != null,
-                              onTap: () => _showPracticeModeSelection(context),
-                            ),
+                          _buildPracticeTypeCard(
+                            context,
+                            theme,
+                            icon: Icons.chat_bubble_outline,
+                            title: 'Conversation',
+                            description: 'Natural dialogues on any topic - basic to advanced',
+                            isEnabled: settings.learningLanguage != null && settings.nativeLanguage != null,
+                            onTap: () => _startConversation(context, settings),
+                          ),
+                          const SizedBox(height: 16),
+                          _buildPracticeTypeCard(
+                            context,
+                            theme,
+                            icon: Icons.rule,
+                            title: 'Grammar',
+                            description: 'Conversation practice focused on specific grammar topics',
+                            isEnabled: settings.learningLanguage != null && settings.nativeLanguage != null,
+                            onTap: () => _selectGrammarTopic(context, settings),
                           ),
                         ],
                       ),
                     ),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     Center(
                       child: RichText(
                         textAlign: TextAlign.center,
                         text: TextSpan(
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            // FIX: Use AppColors for static color constants.
-                            //color: AppColors.textMuted,
                             color: const Color.fromARGB(255, 117, 117, 117),
                           ),
                           children: const [
@@ -195,205 +199,107 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> with 
       ),
     );
   }
-  
-  void _showPracticeModeSelection(BuildContext context) {
-    final theme = Theme.of(context);
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return Consumer<SettingsProvider>(
-          builder: (context, settings, _) {
-            return Container(
-              height: MediaQuery.of(context).size.height * 0.7,
-              decoration: BoxDecoration(
-                color: theme.scaffoldBackgroundColor,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Bottom sheet handle
-                  Align(
-                    alignment: Alignment.center,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 12),
-                      child: Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Choose Practice Mode',
-                          style: theme.textTheme.titleLarge,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'How would you like to practice ${settings.learningLanguage?.name ?? 'your new language'}?',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                        // Practice mode cards
-                        ..._buildPracticeModeCards(context, settings),
-                        const SizedBox(height: 32),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-  
-  List<Widget> _buildPracticeModeCards(BuildContext context, SettingsProvider settings) {
-    final theme = Theme.of(context);
-    
-    return PracticeMode.values.map((mode) {
-      final isSelected = settings.practiceMode == mode;
-      
-      return GestureDetector(
-        onTap: () {
-          // Save the chosen practice mode
-          settings.setPracticeMode(mode);
-          Navigator.pop(context); // Close bottom sheet
-          // Navigate to Mode Selection Screen
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const ModeSelectionScreen()),
-          );
-        },
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isSelected ? AppTheme.primaryColor : Colors.grey.withOpacity(0.3),
-              width: isSelected ? 2 : 1,
-            ),
-            color: isSelected ? AppTheme.primaryColor.withOpacity(0.1) : null,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Row(
-              children: [
-                // Mode icon
-                Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: isSelected ? AppTheme.primaryColor.withValues(alpha: 0.2) : Colors.grey.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    mode == PracticeMode.basicConversation ? Icons.child_care :
-                    mode == PracticeMode.practicalConversation ? Icons.chat_bubble_outline :
-                    mode == PracticeMode.vocabulary ? Icons.menu_book :
-                    Icons.rule,
-                    color: isSelected ? AppTheme.primaryColor : Colors.grey,
-                    size: 28,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                
-                // Mode description
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        mode.displayName,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: isSelected ? AppTheme.primaryColor : null,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        mode.description,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          // FIX: Use AppColors for static color constants.
-                          color: AppColors.textMuted,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                
-                // Selection indicator
-                if (isSelected)
-                  Icon(
-                    Icons.check_circle,
-                    color: AppTheme.primaryColor,
-                    size: 24,
-                  ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }).toList();
-  }
-
-  Widget _buildDashboardCard({
-    required BuildContext context,
-    required String title,
+  Widget _buildPracticeTypeCard(
+    BuildContext context,
+    ThemeData theme, {
     required IconData icon,
+    required String title,
+    required String description,
     required bool isEnabled,
     required VoidCallback onTap,
   }) {
-    final theme = Theme.of(context);
-    return InkWell(
+    return GestureDetector(
       onTap: isEnabled ? onTap : null,
-      borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
         decoration: BoxDecoration(
-          color: isEnabled ? AppTheme.primaryColor.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isEnabled ? AppTheme.primaryColor : Colors.grey.withValues(alpha: 0.3),
+            color: isEnabled
+              ? AppTheme.primaryColor.withValues(alpha: 0.3)
+              : Colors.grey.withValues(alpha: 0.2),
             width: 1,
           ),
+          gradient: LinearGradient(
+            colors: isEnabled
+              ? [
+                  AppTheme.primaryColor.withValues(alpha: 0.1),
+                  AppTheme.primaryColor.withValues(alpha: 0.05),
+                ]
+              : [
+                  Colors.grey.withValues(alpha: 0.05),
+                  Colors.grey.withValues(alpha: 0.02),
+                ],
+          ),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 40,
-              color: isEnabled ? AppTheme.primaryColor : Colors.grey,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: isEnabled ? AppTheme.primaryColor : Colors.grey,
-                fontWeight: FontWeight.bold,
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Row(
+            children: [
+              // Icon
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: isEnabled
+                    ? AppTheme.primaryColor.withValues(alpha: 0.2)
+                    : Colors.grey.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  icon,
+                  color: isEnabled ? AppTheme.primaryColor : Colors.grey,
+                  size: 28,
+                ),
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+              const SizedBox(width: 16),
+
+              // Description
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: isEnabled ? AppTheme.primaryColor : Colors.grey,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: isEnabled ? AppColors.textMuted : Colors.grey.withValues(alpha: 0.5),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              Icon(
+                Icons.arrow_forward,
+                color: isEnabled ? AppTheme.primaryColor : Colors.grey.withValues(alpha: 0.5),
+                size: 24,
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  void _startConversation(BuildContext context, SettingsProvider settings) {
+    settings.setPracticeMode(PracticeMode.conversation);
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const ConversationScreen()),
+    );
+  }
+
+  void _selectGrammarTopic(BuildContext context, SettingsProvider settings) {
+    settings.setPracticeMode(PracticeMode.grammar);
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const GrammarSelectionScreen()),
     );
   }
 }
