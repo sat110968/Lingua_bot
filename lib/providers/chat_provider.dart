@@ -57,8 +57,8 @@ class ChatProvider extends ChangeNotifier {
           .eq('course_identifier', 'global_english_hindi')
           .range(userWordProgressIndex, userWordProgressIndex + wordsPerDayMap - 1); 
           
-      if (res != null && res is List && res.isNotEmpty) {
-        String curriculum = "WORDS FOR TODAY:\n";
+      if (res is List && res.isNotEmpty) {
+        String curriculum = 'WORDS FOR TODAY:\n';
         for (var row in res) {
            curriculum += "- ${row['word']} (Meaning: ${row['native_meaning']}). Example: ${row['example_sentence']}\n";
         }

@@ -85,7 +85,6 @@ class AppTheme extends ThemeExtension<AppTheme> {
       primary: AppColors.primary,
       secondary: AppColors.secondary,
       surface: AppColors.surface,
-      background: AppColors.background,
       error: Colors.red,
     ),
     textTheme: GoogleFonts.poppinsTextTheme(
@@ -107,7 +106,6 @@ class AppTheme extends ThemeExtension<AppTheme> {
       primary: AppColors.primary,
       secondary: AppColors.secondary,
       surface: AppColors.darkSurface,
-      background: AppColors.darkBackground,
       error: Colors.redAccent,
     ),
     textTheme: GoogleFonts.poppinsTextTheme(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
-import '../theme.dart';
 
 enum RoboState { idle, listening, thinking, speaking }
 

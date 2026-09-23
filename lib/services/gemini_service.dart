@@ -15,7 +15,7 @@ class GeminiService {
 
   String _getSystemPrompt(String learningLanguage, String nativeLanguage, String mode, {
     String? curriculumData,
-    String speechLanguage = "Learning",
+    String speechLanguage = 'Learning',
     int currentDay = 1,
     int previousDay = 0,
     int currentWeek = 1,
@@ -231,7 +231,7 @@ Current Curriculum Data: ${curriculumData ?? 'Please prompt the user to start Da
     if (_apiKey.isEmpty) return null;
 
     try {
-      final String embedUrl = 'https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent';
+      const String embedUrl = 'https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent';
       final uri = Uri.parse(embedUrl).replace(queryParameters: {'key': _apiKey});
       
       final response = await http.post(
@@ -270,7 +270,7 @@ Current Curriculum Data: ${curriculumData ?? 'Please prompt the user to start Da
     String speechLanguage = 'Native',
   }) async* {
     if (_apiKey.isEmpty) {
-      yield "API key missing.";
+      yield 'API key missing.';
       return;
     }
 
@@ -338,7 +338,7 @@ Current Curriculum Data: ${curriculumData ?? 'Please prompt the user to start Da
     final response = await request.send();
 
     if (response.statusCode == 200) {
-      await for (var line in response.stream.transform(utf8.decoder).transform(LineSplitter())) {
+      await for (var line in response.stream.transform(utf8.decoder).transform(const LineSplitter())) {
         if (line.trim().isEmpty) continue;
         try {
           final data = jsonDecode(line);
@@ -352,15 +352,15 @@ Current Curriculum Data: ${curriculumData ?? 'Please prompt the user to start Da
       }
     } else {
       if (response.statusCode == 503) {
-        yield "Error: The AI service is temporarily overloaded. Please try again in a moment.";
+        yield 'Error: The AI service is temporarily overloaded. Please try again in a moment.';
       } else {
-        yield "Error: ${response.statusCode}";
+        yield 'Error: ${response.statusCode}';
       }
     }
   }
 
   String _buildFallback(String message, String learningLanguage, String nativeLanguage, {String? error}) {
-    final explanation = error ?? "Sorry, I had trouble generating a full reply. Please ask again in $nativeLanguage for now.";
+    final explanation = error ?? 'Sorry, I had trouble generating a full reply. Please ask again in $nativeLanguage for now.';
     return '''
 I'm facing a temporary issue, so here's a quick response in $learningLanguage:
 

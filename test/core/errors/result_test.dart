@@ -14,20 +14,20 @@ void main() {
   group('Result Type', () {
     group('Success<T, E>', () {
       test('creates success result', () {
-        final result = Success<String, Exception>('value');
+        const result = Success<String, Exception>('value');
 
         expect(result, isA<Success>());
         expect(result.getOrNull(), equals('value'));
       });
 
       test('isSuccess returns true', () {
-        final result = Success<String, Exception>('value');
+        const result = Success<String, Exception>('value');
         expect(result.isSuccess(), isTrue);
         expect(result.isFailure(), isFalse);
       });
 
       test('fold executes success branch', () {
-        final result = Success<String, Exception>('value');
+        const result = Success<String, Exception>('value');
 
         final folded = result.fold(
           onSuccess: (value) => value.toUpperCase(),
@@ -38,7 +38,7 @@ void main() {
       });
 
       test('map transforms the value', () {
-        final result = Success<String, Exception>('hello');
+        const result = Success<String, Exception>('hello');
 
         final mapped = result.map((value) => value.length);
 
@@ -47,7 +47,7 @@ void main() {
 
       test('tap executes side effect and returns self', () {
         var sideEffectExecuted = false;
-        final result = Success<String, Exception>('value');
+        const result = Success<String, Exception>('value');
 
         final returned = result.tap((value) {
           sideEffectExecuted = true;
@@ -58,14 +58,14 @@ void main() {
       });
 
       test('getOrElse returns success value', () {
-        final result = Success<String, Exception>('value');
+        const result = Success<String, Exception>('value');
         final value = result.getOrElse('fallback');
 
         expect(value, equals('value'));
       });
 
       test('getOrThrow returns value', () {
-        final result = Success<String, Exception>('value');
+        const result = Success<String, Exception>('value');
         expect(result.getOrThrow(), equals('value'));
       });
     });
@@ -137,7 +137,7 @@ void main() {
 
     group('flatMap', () {
       test('chains successful results', () {
-        final result = Success<String, Exception>('hello');
+        const result = Success<String, Exception>('hello');
 
         final chained = result.flatMap((value) {
           return Success<int, Exception>(value.length);
@@ -147,7 +147,7 @@ void main() {
       });
 
       test('returns failure if operation fails', () {
-        final result = Success<String, Exception>('hello');
+        const result = Success<String, Exception>('hello');
         final error = Exception('error');
 
         final chained = result.flatMap((value) {
@@ -192,7 +192,7 @@ void main() {
           CustomException(this.message);
         }
 
-        final result = Success<String, Exception>('value');
+        const result = Success<String, Exception>('value');
 
         final transformed = result.mapError<CustomException>(
           (e) => CustomException('error'),
@@ -204,7 +204,7 @@ void main() {
 
     group('getOrNull', () {
       test('returns value on success', () {
-        final result = Success<String, Exception>('value');
+        const result = Success<String, Exception>('value');
         expect(result.getOrNull(), equals('value'));
       });
 
@@ -216,7 +216,7 @@ void main() {
 
     group('getErrorOrNull', () {
       test('returns null on success', () {
-        final result = Success<String, Exception>('value');
+        const result = Success<String, Exception>('value');
         expect(result.getErrorOrNull(), isNull);
       });
 
@@ -229,8 +229,8 @@ void main() {
 
     group('Type safety', () {
       test('preserves type information', () {
-        final stringResult = Success<String, Exception>('hello');
-        final intResult = Success<int, Exception>(42);
+        const stringResult = Success<String, Exception>('hello');
+        const intResult = Success<int, Exception>(42);
 
         expect(stringResult.getOrNull(), isA<String>());
         expect(intResult.getOrNull(), isA<int>());

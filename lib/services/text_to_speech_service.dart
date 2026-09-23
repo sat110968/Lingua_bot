@@ -124,15 +124,15 @@ class TextToSpeechService extends ChangeNotifier {
           
           for (var v in voices) {
             if (v is Map) {
-              final name = v["name"]?.toString().toLowerCase() ?? '';
-              final locale = v["locale"]?.toString().toLowerCase() ?? '';
+              final name = v['name']?.toString().toLowerCase() ?? '';
+              final locale = v['locale']?.toString().toLowerCase() ?? '';
               
               if (languageCode == 'en-IN' && locale.contains('en-in') && (name.contains('female') || name.contains('neerja'))) {
-                 perfectIndianFemale = {"name": v["name"].toString(), "locale": v["locale"].toString()};
+                 perfectIndianFemale = {'name': v['name'].toString(), 'locale': v['locale'].toString()};
               }
-              else if (locale.startsWith(languageCode!.split('-')[0].toLowerCase())) {
+              else if (locale.startsWith(languageCode.split('-')[0].toLowerCase())) {
                  if (name.contains('female') || name.contains('woman') || name.contains('zira') || name.contains('samantha')) {
-                    fallbackFemale = {"name": v["name"].toString(), "locale": v["locale"].toString()};
+                    fallbackFemale = {'name': v['name'].toString(), 'locale': v['locale'].toString()};
                  }
               }
             }
@@ -152,7 +152,7 @@ class TextToSpeechService extends ChangeNotifier {
       await setPitch(1.2);
 
       // Set language if provided
-      if (languageCode != null && languageCode != _currentLanguageCode) {
+      if (languageCode != _currentLanguageCode) {
         try {
            await setLanguage(languageCode);
         } catch (e) {

@@ -40,7 +40,7 @@ class SpeechToTextService with ChangeNotifier {
       );
       return _isInitialized;
     } catch (e) {
-      _lastError = "Failed to initialize speech service: ${e.toString()}";
+      _lastError = 'Failed to initialize speech service: ${e.toString()}';
       return false;
     }
   }
@@ -50,11 +50,11 @@ class SpeechToTextService with ChangeNotifier {
   /// Returns `true` if listening started successfully.
   Future<bool> startListening(String languageCode) async {
     if (!_isInitialized) {
-      _lastError = "Service not initialized.";
+      _lastError = 'Service not initialized.';
       return false;
     }
     if (_isListening) {
-      _lastError = "Already listening.";
+      _lastError = 'Already listening.';
       return false;
     }
 
@@ -74,7 +74,7 @@ class SpeechToTextService with ChangeNotifier {
       return await _listeningCompleter!.future.timeout(const Duration(seconds: 5));
 
     } catch (e) {
-      _lastError = "An unexpected error occurred while starting to listen: ${e.toString()}";
+      _lastError = 'An unexpected error occurred while starting to listen: ${e.toString()}';
       _listeningCompleter?.complete(false);
       return false;
     }
@@ -142,6 +142,7 @@ class SpeechToTextService with ChangeNotifier {
   }
 
   /// Disposes the stream controller.
+  @override
   void dispose() {
     _textStreamController.close();
   }

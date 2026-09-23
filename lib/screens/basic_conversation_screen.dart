@@ -42,7 +42,7 @@ class _BasicConversationScreenState extends State<BasicConversationScreen> {
   void _sendInitialMessage(SettingsProvider settings) {
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
 
-    final welcomeMessage =
+    const welcomeMessage =
         'Start your daily 25-word vocabulary practice! I will teach you new words with examples and pronunciation. Ready to learn?';
 
     chatProvider.addMessage(

@@ -25,7 +25,7 @@ class LearningLanguageSelector extends StatelessWidget {
 
     final Gradient? gradient = appTheme?.secondaryGradient;
     // Ensure fallbackColor is non-null
-    final Color fallbackColor = AppColors.secondary;
+    const Color fallbackColor = AppColors.secondary;
     final Color dropdownColor = Colors.grey.shade800;
 
     // If gradient is null, use a concrete color (never pass null where Color is required)
@@ -87,7 +87,7 @@ class NativeLanguageSelector extends StatelessWidget {
     }
 
     final Gradient? gradient = appTheme?.primaryGradient;
-    final Color fallbackColor = AppColors.primary;
+    const Color fallbackColor = AppColors.primary;
     final Color dropdownColor = Colors.grey.shade800;
 
     final Color? decorationColor = gradient == null ? fallbackColor : null;

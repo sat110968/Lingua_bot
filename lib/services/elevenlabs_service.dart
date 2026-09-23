@@ -6,7 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:audioplayers/audioplayers.dart';
 
 class ElevenLabsService with ChangeNotifier {
-  static const String _apiKey = "f1443dfa10e6ba876ab85ac593382605173aab712ae28563e23c435b59e2d8ea";
+  static const String _apiKey = 'f1443dfa10e6ba876ab85ac593382605173aab712ae28563e23c435b59e2d8ea';
   final AudioPlayer _audioPlayer = AudioPlayer();
 
   String? _currentlyPlayingMessageId;

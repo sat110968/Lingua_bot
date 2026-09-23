@@ -21,15 +21,15 @@ Future<void> main() async {
     if (line.startsWith('GEMINI_API_KEY=')) {
       geminiKey = line.split('=')[1].trim();
       // Remove any trailing quotes
-      geminiKey = geminiKey.replaceAll('"', '').replaceAll("'", "");
+      geminiKey = geminiKey.replaceAll('"', '').replaceAll("'", '');
     }
     if (line.startsWith('SUPABASE_URL=')) {
       supabaseUrl = line.split('=')[1].trim();
-      supabaseUrl = supabaseUrl.replaceAll('"', '').replaceAll("'", "");
+      supabaseUrl = supabaseUrl.replaceAll('"', '').replaceAll("'", '');
     }
     if (line.startsWith('SUPABASE_ANON_KEY=')) {
       supabaseKey = line.split('=')[1].trim();
-      supabaseKey = supabaseKey.replaceAll('"', '').replaceAll("'", "");
+      supabaseKey = supabaseKey.replaceAll('"', '').replaceAll("'", '');
     }
   }
 
@@ -51,7 +51,7 @@ Future<void> main() async {
     // 1. Call Gemini
     final String geminiUrl = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=$geminiKey';
     
-    final prompt = """
+    const prompt = """
       Generate 50 extremely common, beginner-level English vocabulary words that are essential for daily fluency.
       Do not repeat words you'd typically give (try to randomize slightly).
       Provide the English word, its Hindi translation, and a simple English example sentence.
@@ -66,8 +66,8 @@ Future<void> main() async {
         'contents': [
           {'role': 'user', 'parts': [{'text': prompt}]}
         ],
-        "generationConfig": {
-           "temperature": 0.8
+        'generationConfig': {
+           'temperature': 0.8
         }
       })
     );
